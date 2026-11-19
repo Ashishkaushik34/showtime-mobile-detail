@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, CheckCircle, Loader2, Phone, Calendar, MapPin, Car, ShieldCheck } from 'lucide-react';
+import { Send, CheckCircle, Loader2, Phone, Calendar, MapPin, Car, Droplets, ShieldCheck } from 'lucide-react';
 import { saveLead, getActiveServices } from '../data/store';
 
 export default function EstimateForm() {
@@ -28,6 +28,20 @@ export default function EstimateForm() {
   }, []);
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  const handleCategoryChange = (cat) => {
+    setForm((f) => ({
+      ...f,
+      category: cat,
+      selectedService: cat === 'Auto Detailing'
+        ? 'Full Interior & Exterior Detail'
+        : 'Driveway & Garage Floor Pressure Wash',
+      vehicleSize: cat === 'Auto Detailing'
+        ? 'SUV / Mid-Size Truck'
+        : 'Medium Home Exterior / Driveway (500 - 1,500 sq ft)',
+      details: '',
+    }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -110,14 +124,14 @@ export default function EstimateForm() {
                     <button
                       key={cat}
                       type="button"
-                      onClick={() => setForm((f) => ({ ...f, category: cat }))}
+                      onClick={() => handleCategoryChange(cat)}
                       className={`py-3.5 px-4 rounded-xl text-xs sm:text-sm font-bold border transition-all flex items-center justify-center gap-2 ${
                         form.category === cat
                           ? 'gold-gradient text-brand-bg border-brand-gold shadow-lg shadow-brand-gold/20'
                           : 'bg-brand-bg text-brand-silver border-white/10 hover:border-white/20 hover:text-white'
                       }`}
                     >
-                      <Car size={16} />
+                      {cat === 'Auto Detailing' ? <Car size={16} /> : <Droplets size={16} />}
                       {cat}
                     </button>
                   ))}
@@ -156,7 +170,7 @@ export default function EstimateForm() {
                   </select>
                 </div>
 
-                {/* Vehicle Size (if Auto) or Area Sq Ft (if Pressure) */}
+                {/* Vehicle Size (if Auto) or Estimated Area (if Pressure) */}
                 <div>
                   <label className="block text-xs font-semibold text-brand-silver mb-2 uppercase tracking-wider">
                     {form.category === 'Auto Detailing' ? 'Vehicle Size *' : 'Estimated Area *'}
@@ -175,14 +189,18 @@ export default function EstimateForm() {
                       <option>Exotic / Supercar / Classic</option>
                     </select>
                   ) : (
-                    <input
+                    <select
                       name="vehicleSize"
                       value={form.vehicleSize}
                       onChange={handleChange}
-                      placeholder="e.g. 2-car driveway (~800 sq ft)"
                       className={inputClass}
                       required
-                    />
+                    >
+                      <option>Small Driveway / Patio (Under 500 sq ft)</option>
+                      <option>Medium Home Exterior / Driveway (500 - 1,500 sq ft)</option>
+                      <option>Large Property / Full Exterior (1,500+ sq ft)</option>
+                      <option>Commercial / Multi-Surface</option>
+                    </select>
                   )}
                 </div>
               </div>
@@ -248,14 +266,20 @@ export default function EstimateForm() {
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-brand-silver mb-2 uppercase tracking-wider">
-                    Vehicle Year, Make &amp; Model *
+                    {form.category === 'Auto Detailing'
+                      ? 'Vehicle Year, Make & Model *'
+                      : 'Property Type & Surface Details *'}
                   </label>
                   <input
                     name="details"
                     value={form.details}
                     onChange={handleChange}
                     required
-                    placeholder="e.g. 2024 Porsche Cayenne - Black"
+                    placeholder={
+                      form.category === 'Auto Detailing'
+                        ? 'e.g. 2024 Porsche Cayenne - Black'
+                        : 'e.g. Concrete driveway, brick patio, 2-story stucco'
+                    }
                     className={inputClass}
                   />
                 </div>
@@ -295,14 +319,20 @@ export default function EstimateForm() {
               {/* Notes */}
               <div>
                 <label className="block text-xs font-semibold text-brand-silver mb-2 uppercase tracking-wider">
-                  Special Notes or Severe Issues (Pet Hair, Heavy Stains, Tree Sap, etc.)
+                  {form.category === 'Auto Detailing'
+                    ? 'Special Notes or Severe Issues (Pet Hair, Heavy Stains, Tree Sap, etc.)'
+                    : 'Special Notes (Oil Stains, Mildew, Delicate Surfaces, Etc.)'}
                 </label>
                 <textarea
                   name="notes"
                   value={form.notes}
                   onChange={handleChange}
                   rows={2}
-                  placeholder="Tell us anything we should prepare for..."
+                  placeholder={
+                    form.category === 'Auto Detailing'
+                      ? 'Tell us anything we should prepare for...'
+                      : 'Tell us about stubborn oil stains, mildew, delicate landscaping, etc...'
+                  }
                   className={inputClass + " resize-none"}
                 />
               </div>
